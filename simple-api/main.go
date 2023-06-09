@@ -134,6 +134,22 @@ func putHandler(c *gin.Context, db *sql.DB) {
 	}
 }
 
+func delHandler(c *gin.Context, db *sql.DB) {
+	studentId := c.Param("student_id")
+
+	_, err := db.Exec("DELETE FROM students WHERE student_id=$1", studentId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Success Delete Data",
+	})
+}
+
 func setupRouter() *gin.Engine {
 	conn := "postgres://postgres:user001@localhost/iprijaya?sslmode=disable"
 	db, err := sql.Open("postgres", conn)
@@ -157,6 +173,10 @@ func setupRouter() *gin.Engine {
 
 	r.PUT("/student/:student_id", func(ctx *gin.Context) {
 		putHandler(ctx, db)
+	})
+
+	r.DELETE("/student/:student_id", func(ctx *gin.Context) {
+		delHandler(ctx, db)
 	})
 
 	return r

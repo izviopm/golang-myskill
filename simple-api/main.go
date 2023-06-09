@@ -111,6 +111,29 @@ func getHandler(c *gin.Context, db *sql.DB) {
 	})
 }
 
+func putHandler(c *gin.Context, db *sql.DB) {
+	var newStudent newStudent
+
+	studentId := c.Param("student_id")
+
+	if c.Bind(&newStudent) == nil {
+		_, err := db.Exec("UPDATE students SET student_name=$1 WHERE student_id=$2", newStudent.Student_name, studentId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "succes update",
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "error",
+		})
+	}
+}
+
 func setupRouter() *gin.Engine {
 	conn := "postgres://postgres:user001@localhost/iprijaya?sslmode=disable"
 	db, err := sql.Open("postgres", conn)
@@ -130,6 +153,10 @@ func setupRouter() *gin.Engine {
 
 	r.GET("/student/:student_id", func(ctx *gin.Context) {
 		getHandler(ctx, db)
+	})
+
+	r.PUT("/student/:student_id", func(ctx *gin.Context) {
+		putHandler(ctx, db)
 	})
 
 	return r

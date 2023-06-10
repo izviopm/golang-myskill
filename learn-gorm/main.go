@@ -23,6 +23,24 @@ func main() {
 	Migrate()
 }
 
-func Migrate(){
+func Migrate() {
 	DB.AutoMigrate(&models.Student{})
+
+	data := models.Student{}
+	if DB.Find(&data).RowsAffected == 0 {
+		fmt.Println("-------Run Seeder User-------")
+		seederUser()
+	}
+}
+
+func seederUser() {
+	data := models.Student{
+		Student_id: 1,
+		Student_name: "Zexceed",
+		Student_age: 24,
+		Student_address: "Bandung",
+		Student_phone_no: "0821231234",
+	}
+
+	DB.Create(&data)
 }

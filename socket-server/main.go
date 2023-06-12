@@ -42,4 +42,6 @@ func prosesClient(connection net.Conn) {
 		fmt.Println("Error Read...")
 	} 
 	fmt.Println("Received: ", string(buffer[:mLen]))
+	_, err = connection.Write([]byte("Thanks! sudah mengirim pesan : "+string(buffer[:mLen])))
+	defer connection.Close()
 }

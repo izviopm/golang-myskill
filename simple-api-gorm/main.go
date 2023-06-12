@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"simple-api-gorm/auth"
 	"simple-api-gorm/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -109,7 +111,12 @@ func seederUser(db *gorm.DB) {
 }
 
 func setupRouter() *gin.Engine {
-	conn := "host=localhost user=postgres password=user001 dbname=iprijaya port=5432 sslmode=disable TimeZone=Asia/Jakarta"
+	errEnv := godotenv.Load(".env")
+	if errEnv != nil {
+		log.Fatal("Error load env")
+	}
+
+	conn := os.Getenv("POSTGRES_URL")
 	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -118,6 +125,12 @@ func setupRouter() *gin.Engine {
 	Migrate(db)
 
 	r := gin.Default()
+
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "success",
+		})
+	})
 
 	r.POST("/login", auth.LoginHandler)
 
@@ -129,7 +142,7 @@ func setupRouter() *gin.Engine {
 		getAllHandler(ctx, db)
 	})
 
-	r.GET("/student/:student_id", func(ctx *gin.Context) {
+	r.GET("/student/:student_id", middleware.AuthValid, func(ctx *gin.Context) {
 		getHandler(ctx, db)
 	})
 

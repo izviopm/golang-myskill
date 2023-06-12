@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"simple-api-gorm/auth"
+	"simple-api-gorm/middleware"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -117,11 +119,13 @@ func setupRouter() *gin.Engine {
 
 	r := gin.Default()
 
-	r.POST("/student", func(ctx *gin.Context) {
+	r.POST("/login", auth.LoginHandler)
+
+	r.POST("/student", middleware.AuthValid, func(ctx *gin.Context) {
 		postHandler(ctx, db)
 	})
 
-	r.GET("/student", func(ctx *gin.Context) {
+	r.GET("/student", middleware.AuthValid, func(ctx *gin.Context) {
 		getAllHandler(ctx, db)
 	})
 
